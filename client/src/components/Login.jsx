@@ -1,10 +1,8 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-const Login = ({ toggleView }) => {
+const Login = ({ setUser, toggleView }) => {
   const history = useNavigate();
-  const [userId, setUserId] = useState(null);
-
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -23,14 +21,13 @@ const Login = ({ toggleView }) => {
 
       if (response.ok) {
         const userData = await response.json();
-        console.log("User signed in successfully!", userData);
-        setUserId(userData.userId); // Store the userId in state after successful login
+        setUser(userData);
         history("/landing");
       } else {
-        console.error("Signin failed");
+        console.error("Login failed");
       }
     } catch (error) {
-      console.error("Signin error:", error);
+      console.error("Login error:", error);
     }
   };
 

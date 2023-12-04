@@ -12,7 +12,7 @@ const Nav = () => {
   const location = useLocation();
 
   return (
-    <div className="w-full h-[10vh] bg-[#F0F0F0] fixed bottom-0 left-0 flex justify-center items-center">
+    <div className="w-full h-[10vh] bg-[#F0F0F0] fixed bottom-0 left-0 flex justify-center items-center z-50">
       <ul className="flex justify-evenly items-center w-full">
         <li>
           <Link
@@ -32,8 +32,8 @@ const Nav = () => {
         </li>
         <li>
           <Link
-            to="/ticket"
-            className={location.pathname === "/ticket" ? "active" : ""}
+            to="/ticket/details"
+            className={location.pathname === "/ticket/details" ? "active" : ""}
           >
             <FontAwesomeIcon icon={faTicket} />
           </Link>

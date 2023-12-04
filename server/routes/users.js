@@ -30,6 +30,23 @@ router.get("/", async (req, res) => {
   }
 });
 
+router.get("/:userId", async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const user = await db.Users.findByPk(userId);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.status(200).json({ message: "User found", user });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+module.exports = router;
+
 // Signup route
 router.post("/signup", upload.single("image"), async (req, res) => {
   try {

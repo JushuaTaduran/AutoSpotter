@@ -1,26 +1,84 @@
-import React, { useState } from "react";
+import axios from "axios";
+import React, { useEffect, useState } from "react";
+import TicketDetails from "./TicketDetails";
+import { useNavigate } from "react-router-dom";
 
-const TicketForm = ({ onSubmit, userId }) => {
+const TicketForm = () => {
   const [formData, setFormData] = useState({
     ticketname: "",
-    ticketspot: "",
-    ticketcontact: "",
     ticketemail: "",
+    ticketcontact: "",
     ticketvehicle: "",
+    ticketspot: "",
   });
+
+  const [ticketId, setTicketId] = useState(null);
+  const navigate = useNavigate();
+
+  const handleFormSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const userName = formData.ticketname;
+
+      const userResponse = await axios.get(
+        `http://localhost:8001/users?username=${userName}`
+      );
+
+      if (userResponse.data.length > 0) {
+        const userId = userResponse.data[0].id;
+
+        const ticketResponse = await fetch(
+          "http://localhost:8001/tickets/create-ticket",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ ...formData, userId }),
+          }
+        );
+
+        if (ticketResponse.status === 201) {
+          const newTicket = await ticketResponse.json();
+          console.log("New ticket created:", newTicket);
+
+          setTicketId(newTicket.id);
+
+          navigate("/ticket/details", {
+            state: {
+              ticketId: newTicket.id,
+              parkingSpot: formData.ticketspot,
+              contact: formData.ticketcontact,
+              name: formData.ticketname,
+              vehicle: formData.ticketvehicle,
+            },
+          });
+        } else {
+          console.error("Failed to create ticket");
+        }
+      } else {
+        console.error("User not found");
+      }
+    } catch (error) {
+      console.error("Error creating ticket:", error);
+    }
+  };
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    const dataWithUserId = {
-      ...formData,
-      userId: userId, // Use the userId received as a prop
-    };
-    onSubmit(dataWithUserId);
-  };
+  if (ticketId) {
+    return (
+      <TicketDetails
+        ticketname={ticketname}
+        parkingSpot={formData.ticketspot}
+        contact={formData.ticketcontact}
+        email={formData.ticketemail}
+        vehicle={formData.ticketvehicle}
+      />
+    );
+  }
 
   return (
     <div className="w-full h-full flex flex-col justify-center items-center">
@@ -35,16 +93,15 @@ const TicketForm = ({ onSubmit, userId }) => {
         </p>
       </div>
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleFormSubmit}>
         <div>
           <label htmlFor="ticketname">Name:</label>
           <input
             type="text"
             id="ticketname"
             name="ticketname"
-            value={formData.ticketname}
             onChange={handleChange}
-            className="px-4 py-2 border-2 border-solid border-black block"
+            className="px-4 py-2 border-2 border-solid border-black block mb-2"
           />
         </div>
         <div>
@@ -53,9 +110,8 @@ const TicketForm = ({ onSubmit, userId }) => {
             type="text"
             id="ticketspot"
             name="ticketspot"
-            value={formData.ticketspot}
             onChange={handleChange}
-            className="px-4 py-2 border-2 border-solid border-black block"
+            className="px-4 py-2 border-2 border-solid border-black block mb-2"
           />
         </div>
         <div>
@@ -64,9 +120,8 @@ const TicketForm = ({ onSubmit, userId }) => {
             type="text"
             id="ticketemail"
             name="ticketemail"
-            value={formData.ticketemail}
             onChange={handleChange}
-            className="px-4 py-2 border-2 border-solid border-black block"
+            className="px-4 py-2 border-2 border-solid border-black block mb-2"
           />
         </div>
         <div>
@@ -75,9 +130,8 @@ const TicketForm = ({ onSubmit, userId }) => {
             type="text"
             id="ticketcontact"
             name="ticketcontact"
-            value={formData.ticketcontact}
             onChange={handleChange}
-            className="px-4 py-2 border-2 border-solid border-black block"
+            className="px-4 py-2 border-2 border-solid border-black block mb-2"
           />
         </div>
         <div>
@@ -86,9 +140,8 @@ const TicketForm = ({ onSubmit, userId }) => {
             type="text"
             id="ticketvehicle"
             name="ticketvehicle"
-            value={formData.ticketvehicle}
             onChange={handleChange}
-            className="px-4 py-2 border-2 border-solid border-black block"
+            className="px-4 py-2 border-2 border-solid border-black block mb-8"
           />
         </div>
         <button

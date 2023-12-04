@@ -1,20 +1,19 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-const Signup = ({ toggleView }) => {
+const Signup = ({ setUser, toggleView }) => {
   const history = useNavigate();
   const [formData, setFormData] = useState({
     username: "",
     email: "",
     password: "",
-    contact: "", // New field for contact
-    vehicle: "", // New field for vehicle
-    image: null, // New field for image (can be a file)
+    contact: "",
+    vehicle: "",
+    image: null,
   });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     try {
       const formDataToSend = new FormData();
       formDataToSend.append("username", formData.username);
@@ -22,7 +21,7 @@ const Signup = ({ toggleView }) => {
       formDataToSend.append("password", formData.password);
       formDataToSend.append("contact", formData.contact);
       formDataToSend.append("vehicle", formData.vehicle);
-      formDataToSend.append("image", formData.image); // Appending the image file
+      formDataToSend.append("image", formData.image); // Ensure the image data is correctly appended
 
       const response = await fetch("http://localhost:8001/users/signup", {
         method: "POST",
@@ -30,8 +29,9 @@ const Signup = ({ toggleView }) => {
       });
 
       if (response.ok) {
-        console.log("User signed up successfully!");
-        history("/landing");
+        const newUser = await response.json();
+        setUser(newUser);
+        history("/login");
       } else {
         console.error("Signup failed");
       }
@@ -53,7 +53,7 @@ const Signup = ({ toggleView }) => {
   const [usernameFocused, setUsernameFocused] = useState(false);
   const [contactFocused, setContactFocused] = useState(false);
   const [vehicleFocused, setVehicleFocused] = useState(false);
-  const [imageFocused, setImageFocused] = useState(false); // Add this line for image focus
+  const [imageFocused, setImageFocused] = useState(false);
 
   const handleImageFocus = () => {
     setImageFocused(true);
@@ -116,13 +116,13 @@ const Signup = ({ toggleView }) => {
   };
 
   return (
-    <div className="h-full w-full">
+    <div className="h-[115vh] w-full">
       <div className="bg-blue-600 w-full h-[40vh] pl-10 pt-32 flex lg:items-center lg:pt-0 lg:pl-32">
         <h1 className="text-white font-bold text-5xl">
           Create <br /> Account
         </h1>
       </div>
-      <div className="bg-white w-full h-[50vh] flex flex-col justify-center items-center">
+      <div className="bg-white w-full h-[50vh] pt-32 flex flex-col justify-center items-center">
         <form className="w-full max-w-md px-10 lg:px-0" onSubmit={handleSubmit}>
           <div className="mb-6 flex flex-col relative ">
             <label
@@ -221,22 +221,14 @@ const Signup = ({ toggleView }) => {
               onFocus={handlePasswordFocus}
               onBlur={handlePasswordBlur}
               onChange={handleChange}
-              className="block w-full border-b-2 border-gray-300 focus:border-blue-500 outline-none transition-border duration-300 px-3 py-1 mb-12"
+              className="block w-full border-b-2 border-gray-300 focus:border-blue-500 outline-none transition-border duration-300 px-3 py-1"
             />
           </div>
           <div className="mb-6 flex flex-col relative">
-            <label
-              htmlFor="image"
-              className={`${
-                imageFocused ? "text-blue-500 -translate-y-4 text-sm" : ""
-              } transition-transform transform-gpu duration-300 absolute px-3`}
-            >
-              Image Upload
-            </label>
             <input
               id="image"
               type="file"
-              accept="image/*" // Restricts selection to image files
+              accept="image/*"
               onChange={handleChange}
               className="block w-full border-b-2 border-gray-300 focus:border-blue-500 outline-none transition-border duration-300 px-3 py-1 mb-12"
             />

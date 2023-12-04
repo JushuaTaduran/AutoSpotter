@@ -1,65 +1,71 @@
 import React, { useEffect, useState } from "react";
-import io from "socket.io-client";
+import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import car from "../assets/park/car.png";
 
-const ParkingModule = () => {
-  const [parkingStatus, setParkingStatus] = useState(Array(8).fill(0)); // Initialize with 8 parking spaces not occupied
-  const navigate = useNavigate(); // Use useNavigate for navigation
+const ParkingModule = ({ userId }) => {
+  const [parkingStatus, setParkingStatus] = useState(Array(8).fill(0));
+  const navigate = useNavigate();
+
+  const fetchParkingStatus = async () => {
+    try {
+      const response = await axios.get("http://localhost:8001/sensors");
+      const sensorData = response.data;
+
+      // Assuming sensorData is an array of sensor status
+      const updatedStatus = sensorData.map((data) => data.sensorstatus);
+      setParkingStatus(updatedStatus);
+    } catch (error) {
+      console.error("Error fetching sensor status:", error);
+    }
+  };
 
   useEffect(() => {
-    const socket = io("http://localhost:8001", { transports: ["websocket"] });
+    const interval = setInterval(fetchParkingStatus, 5000); // Fetch every 5 seconds
 
-    // Listen for WebSocket events for parking status changes
-    socket.on("parkingStatusUpdate", (updatedStatus) => {
-      setParkingStatus(updatedStatus);
-    });
+    // Fetch parking status on initial component mount
+    fetchParkingStatus();
 
-    // Clean up WebSocket connection on unmount
-    return () => {
-      socket.disconnect();
-    };
+    // Clear interval on unmount
+    return () => clearInterval(interval);
   }, []);
 
   const handleParkingSpotClick = (index) => {
     if (parkingStatus[index] === 0) {
-      // If the spot is available, navigate to the ticket route and pass necessary data
-      navigate("/ticket", {
-        state: {
-          spotNumber: index + 1, // Spot number clicked (1-indexed)
-          // Other necessary data for the ticket creation can be passed here
-        },
-      });
+      navigate(`/ticket/create/${index + 1}`); // Pass spotId as part of the URL
     }
   };
 
   return (
-    <div className="grid grid-cols-2 mb-24">
-      {parkingStatus.map((status, index) => (
-        <div
-          className={`w-32 h-12 mx-12 my-2 lg:mx-40 lg:w-48 lg:h-20 relative transform ${
-            index % 2 !== 0 ? "scale-x-[-1]" : "scale-x-1"
-          }`}
-          key={index}
-          onClick={() => handleParkingSpotClick(index)}
-          style={{ cursor: status === 0 ? "pointer" : "default" }}
-        >
+    <div>
+      <div className="grid gap-4 grid-cols-2 w-full gap-x-8 mb-8">
+        {parkingStatus.map((status, index) => (
           <div
-            className={`absolute inset-0 bg-gradient-to-r ${
+            key={index}
+            className={`h-16 w-32 flex items-center justify-center ${
+              index % 2 !== 0 ? "scale-x-[-1]" : "scale-x-1"
+            } ${
               status === 1
-                ? "from-red-400 to-red-100"
-                : "from-gray-400 to-transparent"
-            } border-2 border-r-0 flex justify-center items-center`}
+                ? "bg-gray-200 border-2 border-r-0 border-l border-black"
+                : "bg-green-400"
+            }`}
+            onClick={() => handleParkingSpotClick(index)}
             style={{
-              borderImage: "linear-gradient(to right, black, transparent)",
-              borderImageSlice: "1",
+              backgroundImage: status === 1 ? `url('${car}')` : "none",
+              backgroundSize: "contain",
+              backgroundRepeat: "no-repeat",
             }}
           >
-            <h3 className={`${index % 2 !== 0 ? "scale-x-[-1]" : "scale-x-1"}`}>
-              {`Park00${index + 1}`}
-            </h3>
+            {status === 1 ? null : (
+              <span
+                className={`${
+                  index % 2 !== 0 ? "scale-x-[-1]" : "scale-x-1"
+                } transform transition-transform duration-300`}
+              >{`Park00${index + 1}`}</span>
+            )}
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   );
 };

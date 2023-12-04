@@ -2,7 +2,7 @@ import { useState } from "react";
 import Login from "../components/Login";
 import Signup from "../components/Signup";
 
-const Auth = () => {
+const Auth = ({ setUser }) => {
   const [isLoginView, setIsLoginView] = useState(true);
 
   const toggleView = () => {
@@ -12,9 +12,9 @@ const Auth = () => {
   return (
     <>
       {isLoginView ? (
-        <Login toggleView={toggleView} />
+        <Login setUser={setUser} toggleView={toggleView} />
       ) : (
-        <Signup toggleView={toggleView} />
+        <Signup setUser={setUser} toggleView={toggleView} />
       )}
     </>
   );

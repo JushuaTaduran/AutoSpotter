@@ -2,10 +2,10 @@ import React from "react";
 import Nav from "../components/Nav";
 import { Link } from "react-router-dom";
 
-const Landing = () => {
+const Landing = ({ userId }) => {
   return (
     <div className="w-full h-full">
-      <div className="flex flex-col justify-center h-[50vh] px-12">
+      <div className="flex flex-col justify-center h-[50vh] px-8">
         <h1 className="font-bold text-5xl mb-12 lg:mx-auto lg:text-center">
           Find Your
           <br /> Parking Spot
@@ -18,12 +18,12 @@ const Landing = () => {
         </Link>
       </div>
       <div className="flex flex-col items-center justify-end h-[40vh] pb-32 gap-4">
-        <p>Update your Profile for better experience</p>
+        <p>Check your Profile here</p>
         <Link
           to="/profile"
           className="flex items-center justify-center rounded w-72 h-12 border-solid border-2 border-black text-center mx-auto"
         >
-          Parking Spaces
+          View Profile
         </Link>
       </div>
     </div>
